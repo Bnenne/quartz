@@ -35,11 +35,8 @@ export const ShowOnly: QuartzTransformerPlugin = () => {
                 newChildren.push(node)
               }
             }
-
-            return {
-              type: "paragraph",
-              children: [{ type: 'text', value: newChildren }]
-            }
+            
+            return newChildren
           }
         },
       ]
