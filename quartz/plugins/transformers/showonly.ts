@@ -20,7 +20,7 @@ export const ShowOnly: QuartzTransformerPlugin = () => {
                   .join(" ")
 
                 // if header includes %%show%%
-                if (text.includes("%%show%%")) {
+                if (text.includes("!show")) {
                   keep = true
                   newChildren.push(node) // keep the heading itself
                   continue
