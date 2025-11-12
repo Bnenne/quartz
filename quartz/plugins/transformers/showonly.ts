@@ -6,8 +6,7 @@ export const ShowOnly: QuartzTransformerPlugin = () => {
   return {
     name: "ShowOnly",
     markdownPlugins() {
-      return [
-        () => {
+      return [() => {
           return (tree: Root) => {
             const newChildren: Content[] = []
             let keep = false
@@ -37,7 +36,10 @@ export const ShowOnly: QuartzTransformerPlugin = () => {
               }
             }
 
-            tree.children = newChildren
+            return {
+              type: "paragraph",
+              children: [{ type: 'text', value: newChildren }]
+            }
           }
         },
       ]
