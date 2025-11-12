@@ -9,7 +9,7 @@ export const ShowOnly: QuartzTransformerPlugin = () => {
       return [() => {
           return (tree: Root) => {
             const newChildren: Content[] = []
-            let keep = false
+            let keep = true
 
             for (const node of tree.children) {
               if (node.type === "heading") {
