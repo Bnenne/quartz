@@ -35,8 +35,9 @@ export const ShowOnly: QuartzTransformerPlugin = () => {
                 newChildren.push(node)
               }
             }
-            
-            return newChildren
+
+            tree.children = newChildren
+            return tree
           }
         },
       ]
