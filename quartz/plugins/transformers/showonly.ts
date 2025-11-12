@@ -1,40 +1,46 @@
 import { QuartzTransformerPlugin } from "../types"
 import { visit } from "unist-util-visit"
+import { Root, Content, Heading } from "mdast"
 
-/**
- * Keep only paragraphs (and other content) that appear
- * under headings containing "#show". Everything else is removed.
- */
-export const ShowOnly = (): QuartzTransformerPlugin => ({
-  name: "ShowOnly",
-  markdownPlugins() {
-    return [
-      () => {
-        return (tree) => {
-          let keepMode = false
-          const newChildren: any[] = []
+export const ShowOnly: QuartzTransformerPlugin = () => {
+  return {
+    name: "ShowOnly",
+    markdownPlugins() {
+      return [
+        () => {
+          return (tree: Root) => {
+            const newChildren: Content[] = []
+            let keep = false
 
-          for (const node of tree.children) {
-            if (node.type === "heading") {
-              const text = node.children
-                ?.map((c: any) => c.value || "")
-                .join("")
-                .toLowerCase()
+            for (const node of tree.children) {
+              if (node.type === "heading") {
+                const heading = node as Heading
+                const text = heading.children
+                  .filter((c) => c.type === "text")
+                  .map((c: any) => c.value)
+                  .join(" ")
 
-              // Enter keep mode when we hit a #show header
-              keepMode = text.includes("#show")
-              continue // Don’t include the header itself
+                // if header includes %%show%%
+                if (text.includes("%%show%%")) {
+                  keep = true
+                  newChildren.push(node) // keep the heading itself
+                  continue
+                } else {
+                  // reset when a new header that isn’t show appears
+                  keep = false
+                }
+              }
+
+              // if we’re in a "show" section, keep content
+              if (keep) {
+                newChildren.push(node)
+              }
             }
 
-            // Only keep nodes that are inside a #show section
-            if (keepMode) {
-              newChildren.push(node)
-            }
+            tree.children = newChildren
           }
-
-          tree.children = newChildren
-        }
-      },
-    ]
-  },
-})
+        },
+      ]
+    },
+  }
+}
