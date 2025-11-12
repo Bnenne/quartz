@@ -19,8 +19,8 @@ export const ShowOnly: QuartzTransformerPlugin = () => {
                   .map((c: any) => c.value)
                   .join(" ")
 
-                // if header includes %%show%%
-                if (text.includes("!show")) {
+                // if header doesn't include !hide
+                if (!text.includes("!hide")) {
                   keep = true
                   newChildren.push(node) // keep the heading itself
                   continue
