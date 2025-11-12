@@ -1,28 +1,39 @@
 import { QuartzTransformerPlugin } from "../types"
+import { visit } from "unist-util-visit"
 
-export const ShowOnly: QuartzTransformerPlugin = () => ({
+/**
+ * Keep only paragraphs (and other content) that appear
+ * under headings containing "#show". Everything else is removed.
+ */
+export const ShowOnly = (): QuartzTransformerPlugin => ({
   name: "ShowOnly",
-  htmlPlugins() {
+  markdownPlugins() {
     return [
-      {
-        name: "ShowOnlyFilter",
-        transform: (html: string) => {
-          // Match headers and their following content until the next header
-          // Example: <h2>Header #show</h2><p>keep me</p>...
-          const sectionRegex =
-            /<h([1-6])[^>]*>[^<]*#show[^<]*<\/h\1>[\s\S]*?(?=(<h[1-6][^>]*>|$))/gi
+      () => {
+        return (tree) => {
+          let keepMode = false
+          const newChildren: any[] = []
 
-          const matches = [...html.matchAll(sectionRegex)]
-          if (matches.length === 0) return "" // nothing matched
+          for (const node of tree.children) {
+            if (node.type === "heading") {
+              const text = node.children
+                ?.map((c: any) => c.value || "")
+                .join("")
+                .toLowerCase()
 
-          // Combine all #show sections
-          const keptContent = matches.map(m => m[0]).join("\n")
+              // Enter keep mode when we hit a #show header
+              keepMode = text.includes("#show")
+              continue // Don’t include the header itself
+            }
 
-          // Remove "#show" from headers
-          const cleaned = keptContent.replace(/#show/g, "").trim()
+            // Only keep nodes that are inside a #show section
+            if (keepMode) {
+              newChildren.push(node)
+            }
+          }
 
-          return cleaned
-        },
+          tree.children = newChildren
+        }
       },
     ]
   },
